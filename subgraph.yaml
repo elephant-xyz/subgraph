@@ -1,0 +1,28 @@
+specVersion: 0.0.5
+features:
+  - ipfsOnEthereumContracts
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PropertyDataConsensus
+    network: matic
+    source:
+      address: "0x525E59e4DE2B51f52B9e30745a513E407652AB7c"
+      abi: PropertyDataConsensus
+      startBlock: 72926554
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Property
+      abis:
+        - name: PropertyDataConsensus
+          file: ./abis/PropertyDataConsensus.json
+      eventHandlers:
+        - event: DataSubmitted(indexed bytes32,indexed bytes32,indexed address,bytes32)
+          handler: handleDataSubmitted
+        - event: DataGroupHeartBeat(indexed bytes32,indexed bytes32,indexed bytes32,address)
+          handler: handleDataGroupHeartBeat
+      file: ./src/mapping.ts

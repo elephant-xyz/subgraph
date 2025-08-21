@@ -1,0 +1,92 @@
+# Main property data
+type Property @entity(immutable: true) {
+  id: ID!
+  propertyHash: String!
+  dataGroupHash: String!
+  owner: String!
+  submitter: String!
+  dataHash: String!
+  dataContent: String
+  label: String
+  county: String  # Extracted from propertyHash IPFS chain
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: String!
+}
+
+type PropertyLabelPair @entity(immutable: true) {
+  id: ID! # Format: "propertyHash-label"
+  propertyHash: String!
+  label: String!
+  firstSeenTimestamp: BigInt!
+  firstSeenBlockNumber: BigInt!
+}
+
+type LabelCounter @entity(immutable: false) {
+  id: ID! # The label value
+  label: String!
+  uniquePropertyCount: Int!
+}
+
+type PropertySubmitterPair @entity(immutable: true) {
+  id: ID! # Format: "propertyHash-submitter-label"
+  propertyHash: String!
+  submitter: String!
+  label: String!
+  firstSeenTimestamp: BigInt!
+  firstSeenBlockNumber: BigInt!
+}
+
+type SubmitterLabelCounter @entity(immutable: false) {
+  id: ID! # Format: "submitter-label"
+  submitter: String!
+  label: String!
+  uniquePropertyCount: Int!
+}
+
+# County tracking entities for mining leaderboard
+type SubmitterCountyPair @entity(immutable: true) {
+  id: ID! # Format: "submitter-county"
+  submitter: String!
+  county: String!
+  firstSeenTimestamp: BigInt!
+  firstSeenBlockNumber: BigInt!
+}
+
+type SubmitterCountyLabelPair @entity(immutable: true) {
+  id: ID! # Format: "submitter-county-label"
+  submitter: String!
+  county: String!
+  label: String!
+  firstSeenTimestamp: BigInt!
+  firstSeenBlockNumber: BigInt!
+}
+
+type SubmitterCountyCounter @entity(immutable: false) {
+  id: ID! # submitter address
+  submitter: String!
+  uniqueCounties: [String!]! # Array of county names mined
+  uniqueCountyCount: Int! # Count of unique counties
+  totalPropertiesMined: Int! # Total properties across all counties
+  lastActivityTimestamp: BigInt! # For "Last Block" column
+  lastActivityBlockNumber: BigInt!
+  propertiesPerSecond: BigDecimal! # Mining speed - properties per second
+  firstActivityTimestamp: BigInt! # To calculate speed
+}
+
+type SubmitterCountyLabelCounter @entity(immutable: false) {
+  id: ID! # Format: "submitter-county-label"
+  submitter: String!
+  county: String!
+  label: String!
+  propertiesMined: Int! # Properties mined for this specific county-label combination
+  lastActivityTimestamp: BigInt!
+  lastActivityBlockNumber: BigInt!
+}
+
+# County-specific counters
+type CountyCounter @entity(immutable: false) {
+  id: ID! # county name  
+  county: String!
+  uniquePropertiesCount: Int! # Total unique properties in this county
+}

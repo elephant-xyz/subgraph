@@ -1,0 +1,34 @@
+{
+  "name": "property-data-subgraph",
+  "version": "1.0.0",
+  "description": "A subgraph for indexing PropertyDataConsensus events",
+  "main": "index.js",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy property-data-subgraph --version-label v0.0.1 --node https://subgraphs.alchemy.com/api/subgraphs/deploy --ipfs https://ipfs.satsuma.xyz",
+    "deploy-alchemy": "graph deploy property-data-subgraph --version-label v0.0.1 --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key YOUR_ALCHEMY_API_KEY --ipfs https://ipfs.satsuma.xyz",
+    "create-local": "graph create --node http://localhost:8020/ property-data-subgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ property-data-subgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 property-data-subgraph"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.69.0",
+    "@graphprotocol/graph-ts": "0.32.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/property-data-subgraph.git"
+  },
+  "keywords": [
+    "subgraph",
+    "graphql",
+    "polygon",
+    "property"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
