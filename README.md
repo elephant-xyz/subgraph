@@ -24,7 +24,7 @@ A subgraph for indexing PropertyDataConsensus contract events on Polygon mainnet
    npm run build
    ```
 
-4**Depoly on alchemy:**
+4. **Depoly on alchemy:**
     ```bash
     graph deploy property-data-subgraph \
     --version-label The-version \
