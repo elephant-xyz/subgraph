@@ -24,6 +24,15 @@ A subgraph for indexing PropertyDataConsensus contract events on Polygon mainnet
    npm run build
    ```
 
+4**Depoly on alchemy:**
+    ```bash
+    graph deploy property-data-subgraph \
+    --version-label The-version \
+    --node https://subgraphs.alchemy.com/api/subgraphs/deploy \
+    --deploy-key P9olXkeTVfE2H \
+    --ipfs https://ipfs.satsuma.xyz
+
+    ```
 ## Deployment
 
 ### Option 1: Deploy to The Graph Studio (Recommended)
