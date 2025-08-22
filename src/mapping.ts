@@ -1,6 +1,6 @@
 import { DataSubmitted, DataGroupHeartBeat } from "../generated/PropertyDataConsensus/PropertyDataConsensus"
 import { Property, PropertyLabelPair, LabelCounter, PropertySubmitterPair, SubmitterLabelCounter, SubmitterCountyPair, SubmitterCountyCounter, CountyCounter, SubmitterCountyLabelPair, SubmitterCountyLabelCounter } from "../generated/schema"
-import { ipfs, json, Bytes, log, BigInt, BigDecimal } from "@graphprotocol/graph-ts"
+import { ipfs, json, Bytes, log, BigInt, BigDecimal, JSONValueKind } from "@graphprotocol/graph-ts"
 
 // Base32 RFC4648 alphabet (lowercase variant used by CID)
 const BASE32_ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
@@ -106,6 +106,12 @@ function extractCountyFromPropertyHash(propertyHashHex: string): string | null {
     return null
   }
   
+  // Check if the JSON value is actually an object
+  if (propertyJson.value.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ Property data is not a JSON object for propertyHash: {}, got type: {}", [propertyHashHex, propertyJson.value.kind.toString()])
+    return null
+  }
+  
   let propertyObject = propertyJson.value.toObject()
   let relationshipsValue = propertyObject.get("relationships")
   if (!relationshipsValue || relationshipsValue.isNull()) {
@@ -113,10 +119,22 @@ function extractCountyFromPropertyHash(propertyHashHex: string): string | null {
     return null
   }
   
+  // Check if relationships is an object
+  if (relationshipsValue.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ Relationships is not an object for propertyHash: {}", [propertyHashHex])
+    return null
+  }
+  
   let relationshipsObject = relationshipsValue.toObject()
   let propertySeedValue = relationshipsObject.get("property_seed")
   if (!propertySeedValue || propertySeedValue.isNull()) {
     log.warning("⚠️ No property_seed found in relationships for propertyHash: {}", [propertyHashHex])
+    return null
+  }
+  
+  // Check if property_seed is an object
+  if (propertySeedValue.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ Property_seed is not an object for propertyHash: {}", [propertyHashHex])
     return null
   }
   
@@ -144,10 +162,22 @@ function extractCountyFromPropertyHash(propertyHashHex: string): string | null {
     return null
   }
   
+  // Check if property_seed JSON is an object
+  if (propertySeedJson.value.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ Property_seed data is not a JSON object for CID: {}", [propertySeedCID])
+    return null
+  }
+  
   let propertySeedObject2 = propertySeedJson.value.toObject()
   let toValue = propertySeedObject2.get("to")
   if (!toValue || toValue.isNull()) {
     log.warning("⚠️ No 'to' field found in property_seed data for CID: {}", [propertySeedCID])
+    return null
+  }
+  
+  // Check if 'to' value is an object
+  if (toValue.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ 'to' field is not an object for CID: {}", [propertySeedCID])
     return null
   }
   
@@ -172,6 +202,12 @@ function extractCountyFromPropertyHash(propertyHashHex: string): string | null {
   let finalJson = json.try_fromBytes(finalData)
   if (finalJson.isError) {
     log.warning("⚠️ Failed to parse final JSON for CID: {}", [toCID])
+    return null
+  }
+  
+  // Check if final JSON is an object
+  if (finalJson.value.kind != JSONValueKind.OBJECT) {
+    log.warning("⚠️ Final data is not a JSON object for CID: {}", [toCID])
     return null
   }
   
@@ -219,14 +255,20 @@ export function handleDataSubmitted(event: DataSubmitted): void {
     // Try to parse as JSON and extract label
     let jsonResult = json.try_fromBytes(ipfsResult)
     if (!jsonResult.isError) {
-      let jsonObject = jsonResult.value.toObject()
-      let labelValue = jsonObject.get("label")
-      
-      if (labelValue && !labelValue.isNull()) {
-        property.label = labelValue.toString()
-        log.info("✅ Successfully extracted label: '{}' for propertyHash: {}", [property.label!, property.propertyHash])
+      // Check if JSON is an object before calling toObject()
+      if (jsonResult.value.kind == JSONValueKind.OBJECT) {
+        let jsonObject = jsonResult.value.toObject()
+        let labelValue = jsonObject.get("label")
+        
+        if (labelValue && !labelValue.isNull()) {
+          property.label = labelValue.toString()
+          log.info("✅ Successfully extracted label: '{}' for propertyHash: {}", [property.label!, property.propertyHash])
+        } else {
+          log.warning("⚠️ Label field not found in JSON for CID: {}", [cid])
+          property.label = null
+        }
       } else {
-        log.warning("⚠️ Label field not found in JSON for CID: {}", [cid])
+        log.warning("⚠️ IPFS content is not a JSON object for CID: {}", [cid])
         property.label = null
       }
     } else {
